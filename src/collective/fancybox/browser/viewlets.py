@@ -2,6 +2,7 @@
 from collective.fancybox.content.lightbox import getLocalLightboxesFor
 from collective.fancybox.content.lightbox import hasGlobalMarker
 from collective.fancybox.interfaces import ICollectiveFancyboxMarker
+from datetime import datetime
 from plone import api
 from plone.app.layout.viewlets.common import ViewletBase
 from zope.interface import providedBy
@@ -128,7 +129,11 @@ class hasLightbox(object):
         id = 'collective.fancybox.{}'.format(self.lightbox.id)
         effective = self.lightbox.effective()
         expires = self.lightbox.expires()
-        timestamp = str(effective.asdatetime().timestamp())
+        # We calculate the timestamp in a Python 2-compatible way, instead of
+        # timestamp = str(effective.asdatetime().timestamp())
+        dt = effective.asdatetime()
+        start = datetime(1970, 1, 1, tzinfo=dt.tzinfo)
+	timestamp = str((dt - start).total_seconds())
         if (self.lightbox.lightbox_repeat != 'always'):
             cookie = self.request.cookies.get(id)
             if cookie == timestamp:
